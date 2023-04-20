@@ -108,6 +108,7 @@
     }
 
     var ws = null;
+    let es = null;
     let counter = 0;
     
     function calculateMps(m) {
@@ -143,6 +144,9 @@
         // addMessage("Disconnected");
         console.log("ws disconnected");
         window.btnConnect.innerHTML = "Disconnected";
+        startSocket();
+        ws.close();
+        startEvents();
       };
       ws.onerror = function (e) {
         console.log("ws error", e);
@@ -171,7 +175,7 @@
       }
     }
     function startEvents() {
-      var es = new EventSource('/events');
+      es = new EventSource('/events');
       es.onopen = function (e) {
         // addMessage("Events Opened");
         console.log("Events Opened");
@@ -179,7 +183,7 @@
       es.onerror = function (e) {
         if (e.target.readyState != EventSource.OPEN) {
           // addMessage("Events Closed");
-          console.log("Events Closed");
+          console.log("Events error");
         }
       };
       es.onmessage = function (e) {
@@ -321,8 +325,9 @@
 
 
     document.getElementById('btnConnect').addEventListener('click', function () {
-      startSocket();
-      startEvents();
+      es.close();
+      // startSocket();
+      // startEvents();
     });
 
     var colorNames = Object.keys(chartColors);
