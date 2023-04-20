@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--<link rel="stylesheet" href="css/pico.min.css">-->
+  <link rel="stylesheet" href="pico.min.css">
+  <title>Home!</title>
+
+  <style type="text/css" media="screen">
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+    }
+
+    #dbg,
+    #input_div,
+    #input_el {
+      font-family: monaco;
+      font-size: 12px;
+      line-height: 13px;
+      color: #AAA;
+    }
+
+    #dbg,
+    #input_div {
+      margin: 0;
+      padding: 0;
+      padding-left: 4px;
+    }
+
+    #input_el {
+      width: 98%;
+      background-color: rgba(0, 0, 0, 0);
+      border: 0px;
+    }
+
+    #input_el:focus {
+      outline: none;
+    }
+  </style>
+
+</head>
+
+<body>
+  <main class="container">
+    <nav>
+      <ul>
+        <li><a href="index.htm" class="secondary">Home</a></li>
+      </ul>
+      <ul>
+        <li><a href="wifi.htm" class="secondary">Wifi</a></li>
+      </ul>
+      <ul>
+        <li><a href="config.htm" class="secondary">Config</a></li>
+      </ul>
+    </nav>
+
+    <div>
+      <canvas id="myChart"></canvas>
+    </div>
+    <p>
+      <button id="btnConnect">Disconnected</button>
+      <button id="btnLaser">Turn On Laser</button>
+    </p>
+
+    <h3 id="dist">0.0</h3>
+    <h3 id="sig">0.0</h3>
+    <h3 id="temp">0.0</h3>
+    <h3 id="mps">0.0</h3>
+
+    <pre id="dbg"></pre>
+    <div id="input_div">
+      $<input type="text" value="" id="input_el">
+    </div>
+
+
+  </main>
+
+  <!--<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/min/moment.min.js"></script>-->
+  <!--<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>-->
+  <!--<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@1.9.0"></script>-->
+  <!--<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>-->
+
+  <!--<script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2"></script>-->
+  <!--<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>-->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1"></script>
+  <!--<script src="https://cdn.jsdelivr.net/npm/luxon@1.27.0"></script>-->
+  <!--<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.0.0"></script>-->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+  <script type="text/javascript">
+
+    window.onload = function () {
+      var ctx = document.getElementById('myChart').getContext('2d');
+
+      window.myChart = new Chart(ctx, config);
+
+
+      startSocket();
+      startEvents();
+
+      // startFeed(0);
+    }
+
+    var ws = null;
+    let counter = 0;
+    
+    function calculateMps(m) {
+      document.getElementById('mps').innerHTML = counter;
+      counter=0;
+    }
+    
+    setInterval(calculateMps, 1000);
+    
+    function ge(s) { return document.getElementById(s); }
+    function ce(s) { return document.createElement(s); }
+    function stb() { window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight); }
+    function sendBlob(str) {
+      var buf = new Uint8Array(str.length);
+      for (var i = 0; i < str.length; ++i) buf[i] = str.charCodeAt(i);
+      ws.send(buf);
+    }
+    function addMessage(m) {
+      var msg = ce("div");
+      msg.innerText = m;
+      ge("dbg").appendChild(msg);
+      stb();
+    }
+    function startSocket() {
+      ws = new WebSocket('ws://' + document.location.host + '/ws', ['arduino']);
+      ws.binaryType = "arraybuffer";
+      ws.onopen = function (e) {
+        // addMessage("Connected");
+        console.log("ws connected");
+        window.btnConnect.innerHTML = "Connected";
+      };
+      ws.onclose = function (e) {
+        // addMessage("Disconnected");
+        console.log("ws disconnected");
+        window.btnConnect.innerHTML = "Disconnected";
+      };
+      ws.onerror = function (e) {
+        console.log("ws error", e);
+        // addMessage("Error");
+      };
+      ws.onmessage = function (e) {
+        var msg = "";
+        if (e.data instanceof ArrayBuffer) {
+          msg = "BIN:";
+          var bytes = new Uint8Array(e.data);
+          for (var i = 0; i < bytes.length; i++) {
+            msg += String.fromCharCode(bytes[i]);
+          }
+        } else {
+          msg = "TXT:" + e.data;
+        }
+        // addMessage(msg);
+        console.log(msg);
+      };
+      ge("input_el").onkeydown = function (e) {
+        stb();
+        if (e.keyCode == 13 && ge("input_el").value != "") {
+          ws.send(ge("input_el").value);
+          ge("input_el").value = "";
+        }
+      }
+    }
+    function startEvents() {
+      var es = new EventSource('/events');
+      es.onopen = function (e) {
+        // addMessage("Events Opened");
+        console.log("Events Opened");
+      };
+      es.onerror = function (e) {
+        if (e.target.readyState != EventSource.OPEN) {
+          // addMessage("Events Closed");
+          console.log("Events Closed");
+        }
+      };
+      es.onmessage = function (e) {
+        // addMessage("Event: " + e.data);
+        let data = e.data;
+        if (data[0] == 'g' && data[2] == '?') {
+          console.log(e.data);
+          document.getElementById("btnLaser").innerHTML = "Turn On";
+          document.getElementById("btnLaser").style.removeProperty('background');
+          return;
+        }
+        
+        if (data[0] !== 'g' || data[2] !== 'h') {
+          console.log(e.data);
+          return;
+        }
+
+        window.btnLaser.innerHTML = "Turn Off";
+        document.getElementById("btnLaser").style.setProperty("background", "red");
+        
+        data = e.data.split("+");
+
+        let dist = Number(data[1]) / 10;
+        let sig = Number(data[2]) / 25000;
+        let temp = Number(data[3]) / 10;
+
+        document.getElementById("dist").innerHTML = dist;
+        document.getElementById("sig").innerHTML = sig;
+        document.getElementById("temp").innerHTML = temp;
+
+
+        feedData({
+          index: 0,
+          timestamp: Date.now(),
+          value: dist
+        });
+
+        counter++;
+
+      };
+      es.addEventListener('ota', function (e) {
+        addMessage("Event[ota]: " + e.data);
+      }, false);
+    }
+
+
+    var chartColors = {
+      red: 'rgb(255, 99, 132)',
+      orange: 'rgb(255, 159, 64)',
+      yellow: 'rgb(255, 205, 86)',
+      green: 'rgb(75, 192, 192)',
+      blue: 'rgb(54, 162, 235)',
+      purple: 'rgb(153, 102, 255)',
+      grey: 'rgb(201, 203, 207)'
+    };
+
+
+    function feedData(event) {
+      window.myChart.data.datasets[event.index].data.push({
+        x: event.timestamp,
+        y: event.value
+      });
+      // window.myChart.update('quiet');
+      // window.myChart.update({
+      //   preservation: true
+      // });
+    }
+
+    var color = Chart.helpers.color;
+    var config = {
+      type: 'line',
+      data: {
+        datasets: [{
+          label: 'Distance',
+          backgroundColor: color(chartColors.yellow).alpha(0.5).rgbString(),
+          borderColor: chartColors.yellow,
+          // fill: false,
+          // lineTension: 0,
+          // 	borderDash: [8, 4],
+          // lineWidth: 6,
+          borderWidth: 1,
+          data: []
+        }]
+      },
+      options: {
+        plugins: {
+          // Change options for ALL axes of THIS CHART
+          streaming: {
+            duration: 5000,
+            delay: 0
+          }
+        },
+        animation: false,
+        spanGaps: true, // enable for all datasets
+        // showLine: false, // disable for all datasets
+        elements: {
+          point: {
+            radius: 1 // default to disabled in all datasets
+          },
+        },
+        title: {
+          display: true,
+          text: 'Push data feed sample'
+        },
+        scales: {
+          x: {
+            type: 'realtime',
+            realtime: {
+              refresh: 10,
+              onRefresh: function(chart) {
+                chart.data.datasets.forEach(function(dataset) {
+                  // dataset.data.push({
+                  //   x: Date.now(),
+                  //   y: Math.random()
+                  // });
+                });
+              }
+            },
+          },
+          y: {
+            min: 0,
+            max: 300,
+            scaleLabel: {
+              display: true,
+              labelString: 'value'
+            }
+          }
+        },
+        // tooltips: {
+        //   mode: 'nearest',
+        //   intersect: false
+        // // },
+        // hover: {
+        //   mode: 'nearest',
+        //   intersect: false
+        // }
+      }
+    };
+
+
+    document.getElementById('btnConnect').addEventListener('click', function () {
+      startSocket();
+      startEvents();
+    });
+
+    var colorNames = Object.keys(chartColors);
+
+    document.getElementById('btnLaser').addEventListener('click', function () {
+      if (this.innerHTML == "Turn Off")
+        ws.send("s0c\r\n");
+      else
+        ws.send("s0h\r\n");
+    });
+
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+{
+    "files.associations": {
+        "*.slave": "cpp",
+        "*.tcc": "cpp",
+        "ostream": "cpp",
+        "array": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "*.optimzed": "cpp",
+        "deque": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "initializer_list": "cpp",
+        "*.danielparnell": "cpp",
+        "regex": "cpp",
+        "system_error": "cpp",
+        "bitset": "cpp",
+        "utility": "cpp",
+        "istream": "cpp"
+    },
+    "cmake.configureOnOpen": false
+}

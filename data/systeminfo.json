@@ -1,0 +1,23 @@
+{
+  "psramsize": 0,
+  "freepsram": 0,
+  "minfreepsram": 0,
+  "maxallocpsram": 0,
+  "heapsize": 321704,
+  "freeheap": 291244,
+  "minfreeheap": 285832,
+  "maxallocheap": 110580,
+  "chiprevision": 3,
+  "chipmodel": "ESP32-D0WDQ5",
+  "chipcores": 2,
+  "cpufreqmhz": 240,
+  "cyclecount": 88486096,
+  "sdkversion": "v4.4.4",
+  "flashchipsize": 4194304,
+  "flashchipspeed": 80000000,
+  "flashchipmode": 0,
+  "sketchsize": 992992,
+  "sketchmd5": "4100a75590e0e6b88623873e58beb418",
+  "freesketchspace": 1310720,
+  "chipid": "C0:49:EF:CC:B6:7C"
+}

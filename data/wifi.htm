@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--<link rel="stylesheet" href="css/pico.min.css">-->
+    <link rel="stylesheet" href="custom.css">
+    <link rel="stylesheet" href="pico.min.css">
+    <style>
+    </style>
+    <title>Wifi!</title>
+</head>
+
+<body>
+    <main class="container">
+<nav>
+  <ul>
+    <li><a href="index.htm" class="secondary">Home</a></li>
+  </ul>
+  <ul>
+    <li><a href="wifi.htm" class="secondary">Wifi</a></li>
+  </ul>
+  <ul>
+    <li><a href="config.htm" class="secondary">Config</a></li>
+  </ul>
+</nav>
+        <!--<h1>Wifi</h1>-->
+
+
+
+        <!--<div>-->
+
+        <!--</div>-->
+
+
+
+        <div class="column is-one-third-desktop">
+            <!-- 3rd column content -->
+            <div class="card">
+
+
+                <span>Click to scan wifi</span>
+                <div id="messages">
+                    <div id="notification" hidden>NOTIF</div>
+                </div>
+
+                <!--<button class="warning">Action</button>-->
+                <button type="button" id="btnScanWifi" class="button is-warning is-block" onclick="scanWifi()">Scan
+                    WiFi</button>
+
+                <div class="field">
+                    <div class="field-label">
+                        <label class="label"></label>
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <div id="aps">
+                                    <span id="numNets">Scanning WiFi...</span>
+                                    <div id="spin" class="spinner spinner-small"></div>
+                                    <!--<span id="numNets">Scanning for wifi...</span>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="field-label">
+                        <label class="label"></label>
+                    </div>
+                    <div class="field-body">
+                        <div class="field">
+                            <div class="control">
+                                <form id="formA">
+                                    <table id="tableAP" class="table is-narrow is-size-7" style="display:none">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th>SSID</th>
+                                                <th>RSSI</th>
+                                                <th>Secure</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="foundAP">
+                                            <tr>
+                                                <td>
+                                                    <input id="radio1" type="radio" name="answer">
+                                                </td>
+                                                <td>
+                                                    <label for="radio1" class="radio">Yes</label>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content">
+                    <form>
+
+                        <div class="field">
+                            <label class="label">WiFi SSID</label>
+                            <div class="control">
+                                <input id="ssid" class="input" type="text">
+                            </div>
+                        </div>
+
+                        <!--<div class="field">-->
+                        <!--  <label class="label">WiFi Password</label>-->
+                        <!--  <div class="control">-->
+                        <!--    <input id="password" class="input" type="password">-->
+                        <!--  </div>-->
+                        <!--</div>-->
+
+                        <div class="field">
+                            <label class="label">WiFi Password</label>
+                            <!--<div class="field-label">-->
+                            <!--  <label class="label">WiFi Password</label>-->
+                            <!--</div>-->
+                        </div>
+
+
+                        <!--<div class="field has-addons">-->
+                        <!--  <div class="control">-->
+                        <!--    <input id="password" class="input is-fullwidth" type="password" placeholder="Find a repository">-->
+                        <!--  </div>-->
+                        <!--  <div class="control">-->
+                        <!--    <a class="button is-info">-->
+                        <!--      Show-->
+                        <!--    </a>-->
+                        <!--  </div>-->
+                        <!--</div>-->
+
+                        <div class="field is-grouped">
+                            <!--<label class="label">WiFi Password</label>-->
+                            <input id="password" class="input" type="text" placeholder="">
+                        </div>
+
+                        <div class="field">
+                            <!--<label class="label">DHCP</label>-->
+                            <div class="control">
+                                <label class="radio">
+                                    <input type="radio" name="dhcp" value="dhcp" checked>
+                                    DHCP
+                                </label>
+                                <label class="radio">
+                                    <input type="radio" name="dhcp" value="static">
+                                    Static IP
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="field" name="static_ip" style="display: none">
+                            <label class="label">Static IP</label>
+                            <div class="control">
+                                <input id="static_ip" class="input" type="text">
+                            </div>
+                        </div>
+
+                        <div class="field" name="static_ip" style="display: none">
+                            <label class="label">Netmask</label>
+                            <div class="control">
+                                <input id="netmask" class="input" type="text">
+                            </div>
+                        </div>
+
+                        <div class="field" name="static_ip" style="display: none">
+                            <label class="label">Gateway</label>
+                            <div class="control">
+                                <input id="gateway" class="input" type="text">
+                            </div>
+                        </div>
+
+                        <div class="field" name="static_ip" style="display: none">
+                            <label class="label">DNS 0</label>
+                            <div class="control">
+                                <input id="dns0" class="input" type="text">
+                            </div>
+                        </div>
+
+                        <div class="field" name="static_ip" style="display: none">
+                            <label class="label">DNS 1</label>
+                            <div class="control">
+                                <input id="dns1" class="input" type="text">
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <div class="field-label">
+                                <label class="label"></label>
+                            </div>
+                            <div class="field-body">
+                                <div class="field">
+                                    <div class="control">
+                                        <!--<input class="button is-info" type="submit" value="Save settings" onclick="sendConfig()">-->
+                                        <!--id="btnSaveConfig" class="button" onclick="sendConfig()"-->
+                                        <button type="button" id="btnSaveConfig" class="button is-warning is-block"
+                                            onclick="sendConfig()">Save settings</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+
+
+    <!-- Javascript section
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!--<script src="bulma-ui.js"></script>-->
+    <script src="wifi.js"></script>
+    <script language="javascript" type="text/javascript">
+
+
+    </script>
+
+
+
+</body>
+
+</html>
