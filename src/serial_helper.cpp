@@ -37,6 +37,6 @@ void serial_2_setup()
     bool onlyOnTimeOut = false;
     Serial2.onReceive(onSerial2Receive, onlyOnTimeOut); // sets a RX callback function for Serial 1
     Serial2.setRxBufferSize(fifoFull);
-    Serial2.begin(baud_2, config_2, Serial2_Rx_Pin, Serial2_Tx_Pin);
     uart_set_mode(Serial2, UART_MODE_RS485_HALF_DUPLEX);
+    Serial2.begin(baud_2, config_2, Serial2_Rx_Pin, Serial2_Tx_Pin);
 }

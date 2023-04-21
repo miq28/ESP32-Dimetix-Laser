@@ -17,7 +17,8 @@
         "system_error": "cpp",
         "bitset": "cpp",
         "utility": "cpp",
-        "istream": "cpp"
+        "istream": "cpp",
+        "new": "cpp"
     },
     "cmake.configureOnOpen": false
 }

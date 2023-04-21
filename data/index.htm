@@ -63,7 +63,7 @@
     </div>
     <p>
       <button id="btnConnect">Disconnected</button>
-      <button id="btnLaser">Turn On Laser</button>
+      <button id="btnLaser">Turn On</button>
     </p>
 
     <h3 id="dist">0.0</h3>
@@ -100,9 +100,8 @@
 
       window.myChart = new Chart(ctx, config);
 
-
       startSocket();
-      startEvents();
+      // startEvents();
 
       // startFeed(0);
     }
@@ -110,6 +109,7 @@
     var ws = null;
     let es = null;
     let counter = 0;
+    let initiateManualConnect = false;
     
     function calculateMps(m) {
       document.getElementById('mps').innerHTML = counter;
@@ -136,17 +136,23 @@
       ws = new WebSocket('ws://' + document.location.host + '/ws', ['arduino']);
       ws.binaryType = "arraybuffer";
       ws.onopen = function (e) {
+        initiateManualConnect = false;
         // addMessage("Connected");
         console.log("ws connected");
-        window.btnConnect.innerHTML = "Connected";
+        document.getElementById("btnConnect").innerHTML = "Connected";
+        document.getElementById("btnConnect").setAttribute("aria-busy", false);
+        startEvents();
+
       };
       ws.onclose = function (e) {
         // addMessage("Disconnected");
         console.log("ws disconnected");
-        window.btnConnect.innerHTML = "Disconnected";
-        startSocket();
-        ws.close();
-        startEvents();
+        if (!initiateManualConnect)
+          document.getElementById("btnConnect").innerHTML = "Disconnected";
+        es.close();
+        // startSocket();
+        // ws.close();
+        // startEvents();
       };
       ws.onerror = function (e) {
         console.log("ws error", e);
@@ -191,6 +197,8 @@
         let data = e.data;
         if (data[0] == 'g' && data[2] == '?') {
           console.log(e.data);
+          counter=0;
+          document.getElementById('mps').innerHTML = counter;
           document.getElementById("btnLaser").innerHTML = "Turn On";
           document.getElementById("btnLaser").style.removeProperty('background');
           return;
@@ -325,9 +333,19 @@
 
 
     document.getElementById('btnConnect').addEventListener('click', function () {
+      initiateManualConnect = true;
+      this.innerHTML = "Reconnecting...";
+      this.setAttribute("aria-busy", true);
       es.close();
+      ws.close();
+      
       // startSocket();
       // startEvents();
+      setTimeout(()=> {
+         startSocket();
+        // startEvents();
+      }
+      ,1000);
     });
 
     var colorNames = Object.keys(chartColors);
