@@ -84,17 +84,6 @@ static void handleNewClient(void *arg, AsyncClient *client)
   client->onTimeout(&handleTimeOut, NULL);
 }
 
-/* Eventsource events */
-static std::vector<AsyncEventSourceClient *> evClients; // a list to hold all clients
-static void handleNewEventSourceClient(AsyncEventSourceClient *client)
-{
-  DEBUG("Eventsource event triggered, lastId: %u\n", client->lastId());
-
-  // add to list
-  evClients.push_back(client);
-  client->send("Event connected!", NULL, millis(), 1000);
-}
-
 void handleSerial2()
 {
   size_t len = Serial2.available();
@@ -121,7 +110,30 @@ void handleSerial2()
     }
   }
 
-  wsEvents.send(data);
+  AsyncEventSourceClient *evClient = reinterpret_cast<AsyncEventSourceClient *>(evClients.back());
+  if (evClients.size())
+  {
+    // for (uint8_t i = 0; i < evClients.size(); i++)
+    // {
+    //   // Check the decimal value of the element.
+    //   // If the value is less than 32, then replace it with dot "." or ascii code 46.
+    //   // The first 32 ASCII codes are unprintable.
+    //   if ((uint8_t)msg[i] < 32)
+    //     msg[i] = (char)46;
+    // }
+    // // if (client->space() > 32 && client->canSend())
+    // // {
+    // //   digitalWrite(TX_LED, HIGH);
+    // //   DEBUG("packet waiting=%d\n", evClient->packetsWaiting());
+    // //   wsEvents.send(data);
+    // // }
+    
+    if (evClient->connected() && evClient->packetsWaiting() < 32) {
+      // wsEvents.send(data);
+      digitalWrite(TX_LED, HIGH);
+      evClient->send(data);
+    }
+  }
 
   digitalWrite(TX_LED, LOW);
 

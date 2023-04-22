@@ -3,7 +3,8 @@
 
 bool configFileNetworkUpdatedFlag = false;
 
-static std::vector<AsyncWebSocketClient *> wsClients; // a list to hold all clients
+std::vector<AsyncWebSocketClient *> wsClients; // a list to hold all clients
+std::vector<AsyncEventSourceClient *> evClients; // a list to hold all clients
 // storage to keep websocket data received
 size_t wsDataLen;
 uint8_t bufWsData[24];
@@ -94,6 +95,16 @@ void handleNewWsClient(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
             }
         }
     }
+}
+
+/* Eventsource events */
+void handleNewEventSourceClient(AsyncEventSourceClient *client)
+{
+  DEBUG("Eventsource event triggered, lastId: %u\n", client->lastId());
+
+  // add to list
+  evClients.push_back(client);
+  client->send("Event connected!", NULL, millis(), 1000);
 }
 
 void handleScan(AsyncWebServerRequest *request)

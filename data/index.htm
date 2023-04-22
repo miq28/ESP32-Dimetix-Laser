@@ -61,8 +61,11 @@
     <div>
       <canvas id="myChart"></canvas>
     </div>
+    <p>Socket: <span id="wsStatus">
+        Disconnected
+      </span></p>
+
     <p>
-      <button id="btnConnect">Disconnected</button>
       <button id="btnLaser">Turn On</button>
     </p>
 
@@ -110,14 +113,14 @@
     let es = null;
     let counter = 0;
     let initiateManualConnect = false;
-    
+
     function calculateMps(m) {
       document.getElementById('mps').innerHTML = counter;
-      counter=0;
+      counter = 0;
     }
-    
+
     setInterval(calculateMps, 1000);
-    
+
     function ge(s) { return document.getElementById(s); }
     function ce(s) { return document.createElement(s); }
     function stb() { window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight); }
@@ -139,8 +142,9 @@
         initiateManualConnect = false;
         // addMessage("Connected");
         console.log("ws connected");
-        document.getElementById("btnConnect").innerHTML = "Connected";
-        document.getElementById("btnConnect").setAttribute("aria-busy", false);
+        document.getElementById("wsStatus").innerHTML = "Connected";
+        document.getElementById("wsStatus").setAttribute("aria-busy", false);
+        document.getElementById("wsStatus").style.color = "lightgreen";
         startEvents();
 
       };
@@ -148,7 +152,8 @@
         // addMessage("Disconnected");
         console.log("ws disconnected");
         if (!initiateManualConnect)
-          document.getElementById("btnConnect").innerHTML = "Disconnected";
+          document.getElementById("wsStatus").innerHTML = "Disconnected";
+        document.getElementById("wsStatus").style.color = "red";
         es.close();
         // startSocket();
         // ws.close();
@@ -197,13 +202,13 @@
         let data = e.data;
         if (data[0] == 'g' && data[2] == '?') {
           console.log(e.data);
-          counter=0;
+          counter = 0;
           document.getElementById('mps').innerHTML = counter;
           document.getElementById("btnLaser").innerHTML = "Turn On";
           document.getElementById("btnLaser").style.removeProperty('background');
           return;
         }
-        
+
         if (data[0] !== 'g' || data[2] !== 'h') {
           console.log(e.data);
           return;
@@ -211,7 +216,7 @@
 
         window.btnLaser.innerHTML = "Turn Off";
         document.getElementById("btnLaser").style.setProperty("background", "red");
-        
+
         data = e.data.split("+");
 
         let dist = Number(data[1]) / 10;
@@ -301,8 +306,8 @@
             type: 'realtime',
             realtime: {
               refresh: 10,
-              onRefresh: function(chart) {
-                chart.data.datasets.forEach(function(dataset) {
+              onRefresh: function (chart) {
+                chart.data.datasets.forEach(function (dataset) {
                   // dataset.data.push({
                   //   x: Date.now(),
                   //   y: Math.random()
@@ -331,21 +336,23 @@
       }
     };
 
-
-    document.getElementById('btnConnect').addEventListener('click', function () {
+    document.getElementById('wsStatus').addEventListener('click', function () {
       initiateManualConnect = true;
       this.innerHTML = "Reconnecting...";
       this.setAttribute("aria-busy", true);
+      this.setAttribute("class", "secondary");
+      this.style.color = "red";
+
       es.close();
       ws.close();
-      
+
       // startSocket();
       // startEvents();
-      setTimeout(()=> {
-         startSocket();
+      setTimeout(() => {
+        startSocket();
         // startEvents();
       }
-      ,1000);
+        , 1000);
     });
 
     var colorNames = Object.keys(chartColors);

@@ -33,8 +33,8 @@ void WiFiEvent(WiFiEvent_t event)
     case ARDUINO_EVENT_WIFI_STA_GOT_IP:
         DEBUG("Obtained IP address: %s\n", WiFi.localIP().toString().c_str());
         DEBUG("RRSI: %i\n", WiFi.RSSI());
-        WiFi.setAutoConnect(false);
-        WiFi.setAutoReconnect(false);
+        WiFi.setAutoConnect(true);
+        WiFi.setAutoReconnect(true);
         break;
     case ARDUINO_EVENT_WIFI_STA_LOST_IP:
         DEBUG("Lost IP address and IP address is reset to 0\n");
