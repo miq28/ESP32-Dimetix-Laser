@@ -7,7 +7,7 @@ window.onload = function () {
     // startSocket();
     //startEvents();
 
-    scanWifi();
+    // scanWifi();
 
     // load("bulma-ui.js", "js", function () {
     //   // Do something after load...
@@ -301,7 +301,7 @@ function reqListenerConfigNetwork() {
     // console.log(this.responseText);
     let json = JSON.parse(this.responseText);
     console.log(json);
-    // document.getElementById("hostname").value = json.hostname;
+    document.getElementById("hostname").value = json.hostname;
     document.getElementById("ssid").value = json.ssid;
     document.getElementById("password").value = json.password;
 
@@ -423,6 +423,7 @@ function something() {
 function prepareConfigJSON() {
     let json = new Object();
     // json.saveconfig = window.location.pathname;
+    json.hostname = document.getElementById("hostname").value;
     json.ssid = document.getElementById("ssid").value;
     if (json.ssid === "") {
         document.getElementById("ssid").className += " is-danger";

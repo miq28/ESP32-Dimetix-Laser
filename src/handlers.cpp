@@ -183,7 +183,7 @@ void handleConfigNetwork(AsyncWebServerRequest *request)
 
                     // update config in the memory
                     // strlcpy(_config.mode, newJson[FPSTR(pgm_mode)], sizeof(_config.mode));
-                    // strlcpy(_config.hostname, newJson[FPSTR(pgm_hostname)], sizeof(_config.hostname));
+                    strlcpy(_config.hostname, newJson[FPSTR(pgm_hostname)], sizeof(_config.hostname));
                     strlcpy(_config.ssid, newJson[FPSTR(pgm_ssid)], sizeof(_config.ssid));
                     strlcpy(_config.password, newJson[FPSTR(pgm_password)], sizeof(_config.password));
                     _config.dhcp = newJson[FPSTR(pgm_dhcp)];
@@ -295,8 +295,9 @@ void handleGETconfig(AsyncWebServerRequest *request)
     root[FPSTR(pgm_tcp_enable)] = _asyncTcp.enable;
     root[FPSTR(pgm_tcp_port)] = _asyncTcp.port;
     root[FPSTR(pgm_udp_enable)] = _asyncUdp.enable;
-    root[FPSTR(pgm_udp_server_address)] = _asyncUdp.serverAddress;
-    root[FPSTR(pgm_udp_port)] = _asyncUdp.port;
+    root[FPSTR(pgm_udp_server_address)] = _asyncUdp.server_address;
+    root[FPSTR(pgm_udp_listen_port)] = _asyncUdp.listen_port;
+    root[FPSTR(pgm_udp_send_port)] = _asyncUdp.send_port;
 
     AsyncResponseStream *response = request->beginResponseStream("application/json");
     serializeJsonPretty(root, *response);
@@ -329,8 +330,11 @@ void handlePOSTconfig(AsyncWebServerRequest *request, uint8_t *data, size_t len,
     _asyncTcp.enable = newJson[FPSTR(pgm_tcp_enable)];
     _asyncTcp.port = newJson[FPSTR(pgm_tcp_port)];
     _asyncUdp.enable = newJson[FPSTR(pgm_udp_enable)];
-    strlcpy(_asyncUdp.serverAddress, newJson[FPSTR(pgm_udp_server_address)], sizeof(_asyncUdp.serverAddress));
-    _asyncUdp.port = newJson[FPSTR(pgm_udp_port)];
+    char buf_ip[16];
+    strlcpy(buf_ip, newJson[FPSTR(pgm_udp_server_address)], sizeof(buf_ip));
+    _asyncUdp.server_address.fromString(buf_ip);
+    _asyncUdp.listen_port = newJson[FPSTR(pgm_udp_listen_port)];
+    _asyncUdp.send_port = newJson[FPSTR(pgm_udp_send_port)];
 
     save_config_dimetix();
 
@@ -385,8 +389,11 @@ void handlePOSTconfig(AsyncWebServerRequest *request, uint8_t *data, size_t len,
             _asyncTcp.enable = newJson[FPSTR(pgm_tcp_enable)];
             _asyncTcp.port = newJson[FPSTR(pgm_tcp_port)];
             _asyncUdp.enable = newJson[FPSTR(pgm_udp_enable)];
-            strlcpy(_asyncUdp.serverAddress, newJson[FPSTR(pgm_udp_server_address)], sizeof(_asyncUdp.serverAddress));
-            _asyncUdp.port = newJson[FPSTR(pgm_udp_port)];
+            char buf[16];
+            strlcpy(buf, newJson[FPSTR(pgm_udp_server_address)], sizeof(buf));
+            _asyncUdp.server_address.fromString(buf);
+            _asyncUdp.listen_port = newJson[FPSTR(pgm_udp_listen_port)];
+            _asyncUdp.send_port = newJson[FPSTR(pgm_udp_send_port)];
 
             save_config_dimetix();
 

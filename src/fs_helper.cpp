@@ -87,8 +87,12 @@ bool load_config_dimetix()
   _asyncTcp.enable = json[FPSTR(pgm_tcp_enable)];
   _asyncTcp.port = json[FPSTR(pgm_tcp_port)];
   _asyncUdp.enable = json[FPSTR(pgm_udp_enable)];
-  strlcpy(_asyncUdp.serverAddress, json[FPSTR(pgm_udp_server_address)], sizeof(_asyncUdp.serverAddress));
-  _asyncUdp.port = json[FPSTR(pgm_udp_port)];
+  
+  char buf[16];
+  strlcpy(buf, json[FPSTR(pgm_udp_server_address)], sizeof(buf));
+  _asyncUdp.server_address.fromString(buf);
+  _asyncUdp.listen_port = json[FPSTR(pgm_udp_listen_port)];
+  _asyncUdp.send_port = json[FPSTR(pgm_udp_send_port)];
 
 //   DEBUG("\r\nDimetix settings loaded successfully.\r\n");
 //   DEBUG("mode: %s\r\n", _config.mode);
@@ -117,8 +121,9 @@ bool save_config_dimetix()
   json[FPSTR(pgm_tcp_enable)] = _asyncTcp.enable;
   json[FPSTR(pgm_tcp_port)] = _asyncTcp.port;
   json[FPSTR(pgm_udp_enable)] = _asyncUdp.enable;
-  json[FPSTR(pgm_udp_server_address)] = _asyncUdp.serverAddress;
-  json[FPSTR(pgm_udp_port)] = _asyncUdp.port;
+  json[FPSTR(pgm_udp_server_address)] = _asyncUdp.server_address.toString();
+  json[FPSTR(pgm_udp_listen_port)] = _asyncUdp.listen_port;
+  json[FPSTR(pgm_udp_send_port)] = _asyncUdp.send_port;
 
   // TODO add AP data to html
   File file = MYFS.open(FPSTR(pgm_configfiledimetix), "w");

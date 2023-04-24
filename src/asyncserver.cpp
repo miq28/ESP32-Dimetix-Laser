@@ -1,15 +1,10 @@
 #include "asyncserver.h"
 #include "handlers.h"
 
-
-
 #define TCP_PORT 7050
 #define UDP_PORT 7050
 
-
 bool cbSerial2;
-
-
 
 // wsDataReceived
 
@@ -19,14 +14,12 @@ AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 AsyncEventSource wsEvents("/events");
 
-
-
 void handleSerial2()
 {
   size_t len = Serial2.available();
 
   char data[len];
-  data[len] = 0; // fill null at the end
+  data[len] = '\0'; // fill null at the end
   for (uint8_t i = 0; i < len; i++)
   {
     data[i] = (char)Serial2.read();
@@ -36,15 +29,27 @@ void handleSerial2()
   // DEBUG("%s\n", message);
   // Serial.write(data);
 
-  AsyncClient *client = reinterpret_cast<AsyncClient *>(clients.back());
-  if (clients.size())
+  if (_asyncTcp.enable)
   {
-    if (client->space() > 32 && client->canSend())
+    AsyncClient *client = reinterpret_cast<AsyncClient *>(clients.back());
+    if (clients.size())
     {
-      digitalWrite(TX_LED, HIGH);
-      client->add(data, len);
-      client->send();
+      if (client->space() > 32 && client->canSend())
+      {
+        digitalWrite(TX_LED, HIGH);
+        client->add(data, len);
+        client->send();
+      }
     }
+  }
+
+  if (_asyncUdp.enable && udp.connected())
+  {
+    // udp.writeTo((uint8_t*)data, len, IPAddress(239,1,2,3), _asyncUdp.send_port); // OK
+    // udp.writeTo((uint8_t*)data, len, IPAddress(239,1,2,3), _asyncUdp.send_port); // OK, maybe faster?
+    udp.writeTo((uint8_t *)data, len, _asyncUdp.server_address, _asyncUdp.send_port); // OK, maybe faster?
+    // udp.broadcast(data); // OK
+    // udp.broadcastTo(data, 7051); // OK
   }
 
   AsyncEventSourceClient *evClient = reinterpret_cast<AsyncEventSourceClient *>(evClients.back());
@@ -230,7 +235,7 @@ bool load_config_network()
   serializeJsonPretty(json, DEBUGPORT);
 #endif
 
-  strlcpy(_config.mode, json[FPSTR(pgm_mode)], sizeof(_config.mode));
+  // strlcpy(_config.mode, json[FPSTR(pgm_mode)], sizeof(_config.mode));
   strlcpy(_config.hostname, json[FPSTR(pgm_hostname)], sizeof(_config.hostname));
   strlcpy(_config.ssid, json[FPSTR(pgm_ssid)], sizeof(_config.ssid));
   strlcpy(_config.password, json[FPSTR(pgm_password)], sizeof(_config.password));
@@ -242,7 +247,7 @@ bool load_config_network()
   strlcpy(_config.dns1, json[FPSTR(pgm_dns1)], sizeof(_config.dns1));
 
   DEBUG("\r\nNetwork settings loaded successfully.\r\n");
-  DEBUG("mode: %s\r\n", _config.mode);
+  // DEBUG("mode: %s\r\n", _config.mode);
   DEBUG("hostname: %s\r\n", _config.hostname);
   DEBUG("ssid: %s\r\n", _config.ssid);
   DEBUG("pass: %s\r\n", _config.password);
@@ -264,7 +269,7 @@ bool save_config_network()
   DEBUG("%s\r\n", __PRETTY_FUNCTION__);
 
   StaticJsonDocument<1024> json;
-  json[FPSTR(pgm_mode)] = _config.mode;
+  // json[FPSTR(pgm_mode)] = _config.mode;
   json[FPSTR(pgm_hostname)] = _config.hostname;
   json[FPSTR(pgm_ssid)] = _config.ssid;
   json[FPSTR(pgm_password)] = _config.password;

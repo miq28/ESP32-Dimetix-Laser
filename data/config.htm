@@ -187,9 +187,16 @@
                   </div>
                   
                   <div class="field">
-                    <label class="label">udp_port</label>
+                    <label class="label">udp_listen_port</label>
                     <div class="control">
-                      <input class="input" id="udp_port" name="udp_port" type="number" min="1024" max="65353">
+                      <input class="input" id="udp_listen_port" name="udp_listen_port" type="number" min="1024" max="65353">
+                    </div>
+                  </div>
+                  
+                  <div class="field">
+                    <label class="label">udp_send_port</label>
+                    <div class="control">
+                      <input class="input" id="udp_send_port" name="udp_send_port" type="number" min="1024" max="65353">
                     </div>
                   </div>
                   
@@ -316,7 +323,8 @@
         document.getElementById("tcp_port").value = json.tcp_port;
         document.getElementById("udp_enable").checked = json.udp_enable;
         document.getElementById("udp_server_address").value = json.udp_server_address;
-        document.getElementById("udp_port").value = json.udp_port;
+        document.getElementById("udp_listen_port").value = json.udp_listen_port;
+        document.getElementById("udp_send_port").value = json.udp_send_port;
         
         // something(document.getElementById('operatingmode'));
         // something();

@@ -14,17 +14,17 @@
 
 <body>
     <main class="container">
-<nav>
-  <ul>
-    <li><a href="index.htm" class="secondary">Home</a></li>
-  </ul>
-  <ul>
-    <li><a href="wifi.htm" class="secondary">Wifi</a></li>
-  </ul>
-  <ul>
-    <li><a href="config.htm" class="secondary">Config</a></li>
-  </ul>
-</nav>
+        <nav>
+            <ul>
+                <li><a href="index.htm" class="secondary">Home</a></li>
+            </ul>
+            <ul>
+                <li><a href="wifi.htm" class="secondary">Wifi</a></li>
+            </ul>
+            <ul>
+                <li><a href="config.htm" class="secondary">Config</a></li>
+            </ul>
+        </nav>
         <!--<h1>Wifi</h1>-->
 
 
@@ -38,7 +38,12 @@
         <div class="column is-one-third-desktop">
             <!-- 3rd column content -->
             <div class="card">
-
+                <div class="field">
+                    <label class="label">hostname</label>
+                    <div class="control">
+                        <input id="hostname" class="input" type="text">
+                    </div>
+                </div>
 
                 <span>Click to scan wifi</span>
                 <div id="messages">
@@ -57,8 +62,9 @@
                         <div class="field">
                             <div class="control">
                                 <div id="aps">
-                                    <span id="numNets">Scanning WiFi...</span>
-                                    <div id="spin" class="spinner spinner-small"></div>
+                                    <span id="numNets">0 network found</span>
+                                    <!--<div id="spin" class="spinner spinner-small"></div>-->
+                                    <div id="spin"></div>
                                     <!--<span id="numNets">Scanning for wifi...</span>-->
                                 </div>
                             </div>

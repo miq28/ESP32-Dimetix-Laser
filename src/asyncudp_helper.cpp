@@ -6,11 +6,8 @@ strAsyncUdp _asyncUdp;
 
 void asyncudp_setup()
 {
-    IPAddress udp_ip;
-    udp_ip.fromString(_asyncUdp.serverAddress);
-
-    if (udp.listenMulticast(udp_ip, _asyncUdp.port))
-        DEBUG("AsyncUDP server started, listening on IP: %s\n", udp_ip.toString());
+    if (udp.listenMulticast(_asyncUdp.server_address, _asyncUdp.listen_port))
+        DEBUG("AsyncUDP server started, listening on IP: %s\n", _asyncUdp.server_address.toString());
     {
 
         udp.onPacket([](AsyncUDPPacket packet)

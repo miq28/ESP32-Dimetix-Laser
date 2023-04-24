@@ -381,7 +381,8 @@ const char pgm_tcp_enable[] PROGMEM = "tcp_enable";
 const char pgm_tcp_port[] PROGMEM = "tcp_port";
 const char pgm_udp_enable[] PROGMEM = "udp_enable";
 const char pgm_udp_server_address[] PROGMEM = "udp_server_address";
-const char pgm_udp_port[] PROGMEM = "udp_port";
+const char pgm_udp_listen_port[] PROGMEM = "udp_listen_port";
+const char pgm_udp_send_port[] PROGMEM = "udp_send_port";
 
 const char pgm_configfiledimetix[] PROGMEM = "/configdimetix.json";
 

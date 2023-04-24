@@ -7,10 +7,13 @@
 typedef struct
 {
     bool enable = true;
-    char serverAddress[32] = "239.1.2.3";
-    int port = 7050;
+    IPAddress server_address = IPAddress(239,1,2,3);
+    int listen_port = 7050;
+    int send_port = 7050;
 } strAsyncUdp;
 extern strAsyncUdp _asyncUdp;
+
+extern AsyncUDP udp;
 
 void asyncudp_setup();
 
