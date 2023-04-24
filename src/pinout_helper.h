@@ -3,7 +3,17 @@
 
 #include <Arduino.h>
 
+#define DEBUGPORT Serial
 
+#ifndef RELEASE
+#define DEBUG(fmt, ...)                   \
+  {                                          \
+    static const char pfmt[] PROGMEM = fmt;  \
+    DEBUGPORT.printf_P(pfmt, ##__VA_ARGS__); \
+  }
+#else
+#define DEBUG(...)
+#endif
 
 // hardware config
 #define WIFI_LED NULL

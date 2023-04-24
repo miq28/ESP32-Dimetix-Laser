@@ -22,6 +22,8 @@ void setup()
     wifi_setup();   
     service_setup(); 
     asyncserver_setup();
+    asynctcp_setup();
+    asyncudp_setup();
     serial_2_setup();
 }
 void loop()

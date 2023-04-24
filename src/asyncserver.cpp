@@ -1,17 +1,15 @@
 #include "asyncserver.h"
 #include "handlers.h"
 
-AsyncUDP udp;
+
 
 #define TCP_PORT 7050
 #define UDP_PORT 7050
 
-bool tcpDataReceived;
+
 bool cbSerial2;
 
-// storage to keep data received from tcp
-size_t tcpDataLen;
-uint8_t bufTcpData[24];
+
 
 // wsDataReceived
 
@@ -21,68 +19,7 @@ AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 AsyncEventSource wsEvents("/events");
 
-static std::vector<AsyncClient *> clients; // a list to hold all clients
 
-/* clients events */
-static void handleError(void *arg, AsyncClient *client, int8_t error)
-{
-  DEBUG("%s from Async Tcp Client %s \n", client->errorToString(error), client->remoteIP().toString().c_str());
-}
-
-static void handleData(void *arg, AsyncClient *client, void *data, size_t len)
-{
-  // send to device
-  // this has to be done first
-  // because we will alter the data pointer for printing purpose
-
-  Serial2.write((uint8_t *)data, len);
-  Serial2.flush();
-
-  tcpDataReceived = false;
-  tcpDataLen = len;
-
-  char *msg = (char *)data;
-  msg[len] = 0; // fill null at the end
-  bufTcpData[len] = 0;
-  for (uint8_t i = 0; i < len; i++)
-  {
-    // copy to global storage
-    bufTcpData[i] = (uint8_t)msg[i];
-
-    // FOR PRINTING PURPOSE
-    // Check the decimal value of the element.
-    // If the value is less than 32, then replace it with dot "." or ascii code 46.
-    // The first 32 ASCII codes are unprintable.
-    if ((uint8_t)msg[i] < 32)
-      msg[i] = (char)46;
-  }
-  DEBUG("Tx: %s size=%d\n", msg, len);
-}
-
-static void handleDisconnect(void *arg, AsyncClient *client)
-{
-  DEBUG("Async Tcp Client %s disconnected\n", client->remoteIP().toString().c_str());
-}
-
-static void handleTimeOut(void *arg, AsyncClient *client, uint32_t time)
-{
-  DEBUG("Async Tcp Client ACK timeout ip: %s\n", client->remoteIP().toString().c_str());
-}
-
-/* server events */
-static void handleNewClient(void *arg, AsyncClient *client)
-{
-  DEBUG("New Async Tcp Client connected, ip: %s\n", client->remoteIP().toString().c_str());
-
-  // add to list
-  clients.push_back(client);
-
-  // register events
-  client->onData(&handleData, NULL);
-  client->onError(&handleError, NULL);
-  client->onDisconnect(&handleDisconnect, NULL);
-  client->onTimeout(&handleTimeOut, NULL);
-}
 
 void handleSerial2()
 {
@@ -229,55 +166,6 @@ void asyncserver_setup()
                        });
 
   server.begin();
-
-  AsyncServer *server2 = new AsyncServer(TCP_PORT); // start listening on tcp port 7050
-  server2->onClient(&handleNewClient, server2);
-  server2->begin();
-  DEBUG("AsyncTCP server started\n");
-
-  IPAddress udp_ip = IPAddress(239, 1, 2, 3);
-
-  if (udp.listenMulticast(udp_ip, UDP_PORT))
-    DEBUG("AsyncUDP server started, listening on IP: %s\n", udp_ip.toString());
-  {
-
-    udp.onPacket([](AsyncUDPPacket packet)
-                 {
-                  // Send to Serial2
-                   Serial2.write(packet.data(), packet.length());
-                  //  Serial2.flush();
-                  //  const uint8_t* hello = (uint8_t*)"hello";
-                  //  udp.writeTo(hello, 6, packet.remoteIP(), packet.remotePort()); 
-
-                   DEBUG("UDP Packet Type: ");
-                   DEBUG("%s", packet.isBroadcast() ? "Broadcast" : packet.isMulticast() ? "Multicast"
-                                                                                         : "Unicast");
-                   DEBUG(", From: ");
-                   DEBUG("%s", packet.remoteIP().toString().c_str());
-                   DEBUG(":");
-                   DEBUG("%i", packet.remotePort());
-                   DEBUG(", To: ");
-                   DEBUG("%s", packet.localIP().toString().c_str());
-                   DEBUG(":");
-                   DEBUG("%i", packet.localPort());
-                   DEBUG(", Length: ");
-                   DEBUG("%i", packet.length());
-
-                   char *msg = (char *)packet.data();
-                   msg[packet.length()] = 0; // fill null at the end
-                   for (uint8_t i = 0; i < packet.length(); i++)
-                   {
-                     // Check the decimal value of the element.
-                     // If the value is less than 32, then replace it with dot "." or ascii code 46.
-                     // The first 32 ASCII codes are unprintable.
-                     if ((uint8_t)msg[i] < 32)
-                       msg[i] = (char)46;
-                   }
-                   DEBUG(", Data: %s\n", msg); });
-    // Send multicast
-    // udp.print("Hello!");
-    // udp.printf("Hello! I'm %s, ip: %s\r\n", WiFi.hostname, WiFi.localIP().toString().c_str());
-  }
 }
 
 void asyncserver_loop()

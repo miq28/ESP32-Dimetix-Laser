@@ -12,4 +12,6 @@ typedef struct
 } strAsyncUdp;
 extern strAsyncUdp _asyncUdp;
 
+void asyncudp_setup();
+
 #endif
