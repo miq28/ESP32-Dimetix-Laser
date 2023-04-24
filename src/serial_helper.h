@@ -2,30 +2,22 @@
 #define SERIAL_HELPER_H
 
 #include <Arduino.h>
-// #include "asyncserver.h"
 
+struct strSerial0
+{
+  int baud = 115200;
+  int config = SERIAL_8N1;
+};
+extern strSerial0 _serial0;
 
-
-#define DEBUGPORT Serial
-
-#ifndef RELEASE
-#define DEBUG(fmt, ...)                   \
-  {                                          \
-    static const char pfmt[] PROGMEM = fmt;  \
-    DEBUGPORT.printf_P(pfmt, ##__VA_ARGS__); \
-  }
-#else
-#define DEBUG(...)
-#endif
-
-// hardware config
-#define WIFI_LED NULL
-#define CONNECTION_LED NULL
-#define TX_LED 2
-#define RX_LED 2
+struct strSerial2
+{
+  int baud = 115200;
+  int config = SERIAL_7E1;
+};
+extern strSerial2 _serial2;
 
 void serial_setup();
 void serial_2_setup();
-
 
 #endif

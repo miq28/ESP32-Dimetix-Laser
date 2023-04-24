@@ -113,6 +113,8 @@
     let es = null;
     let counter = 0;
     let initiateManualConnect = false;
+    let initiateToggleLaserOff = false;
+    let sendDataInterval;
 
     function calculateMps(m) {
       document.getElementById('mps').innerHTML = counter;
@@ -202,9 +204,12 @@
         let data = e.data;
         if (data[0] == 'g' && data[2] == '?') {
           console.log(e.data);
+          initiateToggleLaserOff=false;
+          clearInterval(sendDataInterval);
           counter = 0;
           document.getElementById('mps').innerHTML = counter;
           document.getElementById("btnLaser").innerHTML = "Turn On";
+          document.getElementById("btnLaser").setAttribute("aria-busy", false);
           document.getElementById("btnLaser").style.removeProperty('background');
           return;
         }
@@ -213,10 +218,14 @@
           console.log(e.data);
           return;
         }
-
-        window.btnLaser.innerHTML = "Turn Off";
-        document.getElementById("btnLaser").style.setProperty("background", "red");
-
+        
+        if (!initiateToggleLaserOff) {
+          clearInterval(sendDataInterval);
+          document.getElementById("btnLaser").textContent = "Turn Off";
+          document.getElementById("btnLaser").setAttribute("aria-busy", false);
+          document.getElementById("btnLaser").style.setProperty("background", "red");
+        }
+          
         data = e.data.split("+");
 
         let dist = Number(data[1]) / 10;
@@ -351,17 +360,38 @@
       setTimeout(() => {
         startSocket();
         // startEvents();
-      }
-        , 1000);
+      }, 1000);
     });
 
     var colorNames = Object.keys(chartColors);
 
     document.getElementById('btnLaser').addEventListener('click', function () {
-      if (this.innerHTML == "Turn Off")
-        ws.send("s0c\r\n");
-      else
-        ws.send("s0h\r\n");
+      let data;
+      if (this.textContent == "Turn Off") {
+        initiateToggleLaserOff = true;
+        data="s0c\r\n";
+        this.textContent = "Turning Off...";
+        this.setAttribute("aria-busy", true);
+      }
+      else {
+        data="s0h\r\n";
+        this.textContent = "Turning On...";
+        this.setAttribute("aria-busy", true);
+      }
+        
+        
+      sendDataInterval = setInterval(setColor, 1000);
+      
+      function setColor() {
+        console.log('setColor');
+        ws.send(data);
+      }
+
+        
+      // sendDataInterval = setInterval{
+      //   ws.send(data);
+      //   // startEvents();
+      // }, 2000);
     });
 
 

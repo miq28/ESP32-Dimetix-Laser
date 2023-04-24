@@ -1,6 +1,9 @@
 
 
 #include "asyncserver.h"
+#include "serial_helper.h"
+#include "asynctcp_helper.h"
+#include "asyncudp_helper.h"
 
 extern bool configFileNetworkUpdatedFlag;
 
@@ -16,3 +19,5 @@ void handleNewEventSourceClient(AsyncEventSourceClient *client);
 void handleScan(AsyncWebServerRequest *request);
 void handleConfigNetwork(AsyncWebServerRequest *request);
 void handleNotFound(AsyncWebServerRequest *request);
+void handleGETconfig(AsyncWebServerRequest *request);
+void handlePOSTconfig(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);

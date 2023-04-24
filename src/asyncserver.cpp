@@ -127,8 +127,9 @@ void handleSerial2()
     // //   DEBUG("packet waiting=%d\n", evClient->packetsWaiting());
     // //   wsEvents.send(data);
     // // }
-    
-    if (evClient->connected() && evClient->packetsWaiting() < 32) {
+
+    if (evClient->connected() && evClient->packetsWaiting() < 32)
+    {
       // wsEvents.send(data);
       digitalWrite(TX_LED, HIGH);
       evClient->send(data);
@@ -147,8 +148,9 @@ void handleSerial2()
     if ((uint8_t)data[i] < 32)
       data[i] = (char)46;
   }
-  if (data[2] == 'h')
-    return;
+
+  // if (data[2] == 'h')
+  //   return;
   DEBUG("Rx: %s size=%d\n", data, len);
 }
 
@@ -179,6 +181,29 @@ void asyncserver_setup()
   server.on("/description.xml", HTTP_GET, [&](AsyncWebServerRequest *request)
             { request->send(200, "text/xml", SSDP.getSchema()); });
 
+  server.on("/config/network", HTTP_GET, [](AsyncWebServerRequest *request)
+            { send_config_network(request); });
+
+  server.on("/scan", HTTP_GET, [](AsyncWebServerRequest *request)
+            { handleScan(request); });
+
+  server.on("/confignetwork", [](AsyncWebServerRequest *request)
+            { handleConfigNetwork(request); });
+
+  server.on("/config", HTTP_GET, [](AsyncWebServerRequest *request)
+            {
+    DEBUG("%s\r\n", request->url().c_str());
+    handleGETconfig(request); });
+
+  server.on(
+      "/config", HTTP_POST,
+      [](AsyncWebServerRequest *request) {},
+      [](AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final) {},
+      [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+      {
+        DEBUG("%s\r\n", request->url().c_str());
+        handlePOSTconfig(request, data, len, index, total); });
+
   server.rewrite("/", "/wifi.htm").setFilter(ON_AP_FILTER);
   server.serveStatic("/", MYFS, "/").setDefaultFile("index.htm");
 
@@ -194,20 +219,14 @@ void asyncserver_setup()
       DEBUG("UploadEnd: %s (%u)\n", filename.c_str(), index+len); });
   server.onRequestBody([](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
                        {
-    if(!index)
-      DEBUG("BodyStart: %u\n", total);
-    DEBUG("%s", (const char*)data);
-    if(index + len == total)
-      DEBUG("BodyEnd: %u\n", total); });
+                         if (!index)
+                           DEBUG("BodyStart: %u\n", total);
+                         DEBUG("%s", (const char *)data);
+                         if (index + len == total)
+                           DEBUG("BodyEnd: %u\n", total);
 
-  server.on("/config/network", HTTP_GET, [](AsyncWebServerRequest *request)
-            { send_config_network(request); });
-
-  server.on("/scan", HTTP_GET, [](AsyncWebServerRequest *request)
-            { handleScan(request); });
-
-  server.on("/confignetwork", [](AsyncWebServerRequest *request)
-            { handleConfigNetwork(request); });
+                         // if (request->method() == HTTP_POST)
+                       });
 
   server.begin();
 

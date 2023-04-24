@@ -1,7 +1,21 @@
 #ifndef wifi_config_h
 #define wifi_config_h
 
+#define DEBUGPORT Serial
+
+#ifndef RELEASE
+#define DEBUG(fmt, ...)                   \
+  {                                          \
+    static const char pfmt[] PROGMEM = fmt;  \
+    DEBUGPORT.printf_P(pfmt, ##__VA_ARGS__); \
+  }
+#else
+#define DEBUG(...)
+#endif
+
+#include <Arduino.h>
 #include <WiFi.h>
+
 
 
 typedef struct

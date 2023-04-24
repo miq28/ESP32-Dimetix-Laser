@@ -1,5 +1,7 @@
-#ifndef _PROGMEMMATRIX_H
-#define _PROGMEMMATRIX_H
+#ifndef _PROGMEM_HELPER_H
+#define _PROGMEM_HELPER_H
+
+#include <Arduino.h>
 
 const char Page_WaitAndReload[] PROGMEM = R"=====(
 <p>Rebooting...</p>
@@ -370,5 +372,17 @@ const char pgm_sketchmd5[] PROGMEM = "sketchmd5";
 // const char pgm_freesketchspace[] PROGMEM = "freesketchspace";
 
 const char pgm_efusemac[] PROGMEM = "efusemac";
+
+const char pgm_serial0_baud[] PROGMEM = "serial0_baud";
+const char pgm_serial0_config[] PROGMEM = "serial0_config";
+const char pgm_serial2_baud[] PROGMEM = "serial2_baud";
+const char pgm_serial2_config[] PROGMEM = "serial2_config";
+const char pgm_tcp_enable[] PROGMEM = "tcp_enable";
+const char pgm_tcp_port[] PROGMEM = "tcp_port";
+const char pgm_udp_enable[] PROGMEM = "udp_enable";
+const char pgm_udp_server_address[] PROGMEM = "udp_server_address";
+const char pgm_udp_port[] PROGMEM = "udp_port";
+
+const char pgm_configfiledimetix[] PROGMEM = "/configdimetix.json";
 
 #endif

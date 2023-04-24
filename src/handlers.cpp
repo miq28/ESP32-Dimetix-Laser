@@ -3,7 +3,7 @@
 
 bool configFileNetworkUpdatedFlag = false;
 
-std::vector<AsyncWebSocketClient *> wsClients; // a list to hold all clients
+std::vector<AsyncWebSocketClient *> wsClients;   // a list to hold all clients
 std::vector<AsyncEventSourceClient *> evClients; // a list to hold all clients
 // storage to keep websocket data received
 size_t wsDataLen;
@@ -100,11 +100,11 @@ void handleNewWsClient(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
 /* Eventsource events */
 void handleNewEventSourceClient(AsyncEventSourceClient *client)
 {
-  DEBUG("Eventsource event triggered, lastId: %u\n", client->lastId());
+    DEBUG("Eventsource event triggered, lastId: %u\n", client->lastId());
 
-  // add to list
-  evClients.push_back(client);
-  client->send("Event connected!", NULL, millis(), 1000);
+    // add to list
+    evClients.push_back(client);
+    client->send("Event connected!", NULL, millis(), 1000);
 }
 
 void handleScan(AsyncWebServerRequest *request)
@@ -177,7 +177,7 @@ void handleConfigNetwork(AsyncWebServerRequest *request)
                     if (error)
                     {
                         DEBUG("New config received contain error\n");
-                        request->send(200, "text/plain", "Failed");
+                        request->send(400, "text/plain", "Failed");
                         return;
                     }
 
@@ -280,4 +280,119 @@ void handleNotFound(AsyncWebServerRequest *request)
         }
     }
     request->send(404);
+}
+
+void handleGETconfig(AsyncWebServerRequest *request)
+{
+    DEBUG("%s\r\n", __PRETTY_FUNCTION__);
+
+    StaticJsonDocument<1024> root;
+
+    root[FPSTR(pgm_serial0_baud)] = _serial0.baud;
+    root[FPSTR(pgm_serial0_config)] = _serial0.config;
+    root[FPSTR(pgm_serial2_baud)] = _serial2.baud;
+    root[FPSTR(pgm_serial2_config)] = _serial2.config;
+    root[FPSTR(pgm_tcp_enable)] = _asyncTcp.enable;
+    root[FPSTR(pgm_tcp_port)] = _asyncTcp.port;
+    root[FPSTR(pgm_udp_enable)] = _asyncUdp.enable;
+    root[FPSTR(pgm_udp_server_address)] = _asyncUdp.serverAddress;
+    root[FPSTR(pgm_udp_port)] = _asyncUdp.port;
+
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    serializeJsonPretty(root, *response);
+    request->send(response);
+}
+
+void handlePOSTconfig(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+{
+    DEBUG("%s\r\n", __PRETTY_FUNCTION__);
+
+    char buf[len + 1];
+    strlcpy(buf, (const char *)data, sizeof(buf));
+    DEBUG("BODY: %s\n", buf);
+
+    const char *newConfig = buf;
+
+    StaticJsonDocument<1024> newJson;
+    DeserializationError error = deserializeJson(newJson, buf);
+    if (error)
+    {
+        DEBUG("Json Deserialization Error\n");
+        request->send(400, "text/plain", "Json Deserialization Error");
+        return;
+    }
+
+    _serial0.baud = newJson[FPSTR(pgm_serial0_baud)];
+    _serial0.config = newJson[FPSTR(pgm_serial0_config)];
+    _serial2.baud = newJson[FPSTR(pgm_serial2_baud)];
+    _serial2.config = newJson[FPSTR(pgm_serial2_config)];
+    _asyncTcp.enable = newJson[FPSTR(pgm_tcp_enable)];
+    _asyncTcp.port = newJson[FPSTR(pgm_tcp_port)];
+    _asyncUdp.enable = newJson[FPSTR(pgm_udp_enable)];
+    strlcpy(_asyncUdp.serverAddress, newJson[FPSTR(pgm_udp_server_address)], sizeof(_asyncUdp.serverAddress));
+    _asyncUdp.port = newJson[FPSTR(pgm_udp_port)];
+
+    save_config_dimetix();
+
+    // request->send(200, "text/plain", "OK");
+    // request->redirect("/");
+    request->send(302, "text/plain", "redirect wooy");
+    return;
+
+    // List all parameters (Compatibility)
+    int args = request->args();
+    for (int i = 0; i < args; i++)
+    {
+        Serial.printf("ARG[%s]: %s\n", request->argName(i).c_str(), request->arg(i).c_str());
+    }
+
+    // List all parameters
+    int paramLen = request->params();
+    if (!paramLen)
+    {
+        request->send(400, "text/plain", "No data received");
+        return;
+    }
+
+    if (!request->hasParam("body", true))
+    {
+        request->send(400, "text/plain", "No body received");
+        return;
+    }
+
+    DEBUG("param length=%d\n", paramLen);
+    for (int i = 0; i < paramLen; i++)
+    {
+        AsyncWebParameter *p = request->getParam(i);
+        DEBUG("POST [%s]: %s\r\n", p->name().c_str(), p->value().c_str());
+        if (strncmp("body", p->name().c_str(), sizeof("body")) == 0)
+        {
+            const char *newConfig = buf;
+
+            StaticJsonDocument<1024> newJson;
+            DeserializationError error = deserializeJson(newJson, newConfig);
+            if (error)
+            {
+                DEBUG("Json Deserialization Error\n");
+                request->send(400, "text/plain", "Json Deserialization Error");
+                return;
+            }
+
+            _serial0.baud = newJson[FPSTR(pgm_serial0_baud)];
+            _serial0.config = newJson[FPSTR(pgm_serial0_config)];
+            _serial2.baud = newJson[FPSTR(pgm_serial2_baud)];
+            _serial2.config = newJson[FPSTR(pgm_serial2_config)];
+            _asyncTcp.enable = newJson[FPSTR(pgm_tcp_enable)];
+            _asyncTcp.port = newJson[FPSTR(pgm_tcp_port)];
+            _asyncUdp.enable = newJson[FPSTR(pgm_udp_enable)];
+            strlcpy(_asyncUdp.serverAddress, newJson[FPSTR(pgm_udp_server_address)], sizeof(_asyncUdp.serverAddress));
+            _asyncUdp.port = newJson[FPSTR(pgm_udp_port)];
+
+            save_config_dimetix();
+
+            // request->send(200, "text/plain", "OK");
+            request->redirect("/");
+            return;
+        }
+    }
 }

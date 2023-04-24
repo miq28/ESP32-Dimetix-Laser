@@ -6,6 +6,8 @@
 #include <ESPAsyncWebServer.h>
 #include "fs_helper.h"
 #include "service_helper.h"
+#include "asynctcp_helper.h"
+#include "asyncudp_helper.h"
 
 #include <WiFi.h>
 #include <AsyncTCP.h>
@@ -22,7 +24,7 @@
 #include "AsyncJson.h"
 #include <ArduinoJson.h>
 
-#include "progmemmatrix.h"
+#include "progmem_helper.h"
 #include "wifi_helper.h"
 // #include "displayhelper.h"
 
